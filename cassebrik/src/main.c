@@ -31,6 +31,10 @@ struct Item {
 typedef struct BALL {
 	Vector2 center;
 	float   radius;
+	Vector2 north;
+	Vector2 east;
+	Vector2 south;
+	Vector2 west;
 	Vector2 dir;
 	Color   color;
 } Ball;
@@ -57,6 +61,10 @@ int main (int argc, char** argv) {
 	ball.center.x = 0;
 	ball.center.y = 0;
 	ball.radius   = 5;
+	ball.north    = (Vector2){ball.radius,ball.radius};
+	ball.east     = (Vector2){ball.radius,0};
+	ball.south    = (Vector2){-ball.radius,-ball.radius};
+	ball.west     = (Vector2){-ball.radius,0};
 	ball.dir      = (Vector2){1,-1};
 	ball.color    = RED;
 
@@ -100,6 +108,10 @@ int main (int argc, char** argv) {
 			affSepBrik();
 			ball.center.x = paddle.position.x + paddle.size.x / 2;
 			ball.center.y = paddle.position.y - ball.radius;
+			ball.north = (Vector2){ball.center.x+ball.radius,ball.center.y+ball.radius};
+			ball.east  = (Vector2){ball.center.x+ball.radius,ball.center.y};
+			ball.south = (Vector2){ball.center.x+ball.radius,ball.center.y};
+			ball.west  = (Vector2){ball.center.x-ball.radius,ball.center.y-ball.radius};
 		} else {
 
 			// rebond sur le bord haut.
@@ -125,9 +137,6 @@ int main (int argc, char** argv) {
 			    && ball.center.x - ball.radius <= paddle.position.x + paddle.size.x
 				&& ball.center.y + ball.radius >= paddle.position.y
 				&& ball.center.y + ball.radius <= paddle.position.y + paddle.size.y) {
-				    //float mX = paddle.position.x + paddle.size.x / 2.0f;
-
-				    //ball.dir.x = -1;
 					ball.dir.y = -1;
 			}
 
@@ -189,6 +198,10 @@ int main (int argc, char** argv) {
 
 			ball.center.x = ball.center.x + VITESSE * ball.dir.x;
 			ball.center.y = ball.center.y + VITESSE * ball.dir.y;
+			ball.north = (Vector2){ball.center.x+ball.radius,ball.center.y+ball.radius};
+			ball.east  = (Vector2){ball.center.x+ball.radius,ball.center.y};
+			ball.south = (Vector2){ball.center.x+ball.radius,ball.center.y};
+			ball.west  = (Vector2){ball.center.x-ball.radius,ball.center.y-ball.radius};
 		}
 
 		DrawCircleV(ball.center,ball.radius,ball.color);
