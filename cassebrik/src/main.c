@@ -25,6 +25,10 @@ struct Item {
 	Vector2 position;
 	Vector2 size;
 	Color   color;
+	Vector2 haut_droite;
+	Vector2 haut_gauche;
+	Vector2 bas_droite;
+	Vector2 bas_gauche;
 	BOOL    hit;
 };
 
@@ -52,11 +56,17 @@ int main (int argc, char** argv) {
 	Paddle paddle;
 	Ball ball;
 	BOOL start = FALSE;
+	int left;
+	int failled;
 
-	paddle.size     = (Vector2) {200,5};
-	paddle.color    = (Color)   {0,0,1};
-	paddle.position = (Vector2) {WIDTH/2-paddle.size.x/2,HEIGHT - 50};
-	paddle.hit      = FALSE;
+	paddle.size        = (Vector2) {200,5};
+	paddle.color       = (Color)   {0,0,1};
+	paddle.position    = (Vector2) {WIDTH/2-paddle.size.x/2,HEIGHT - 50};
+	paddle.haut_droite = (Vector2) {paddle.position.x,paddle.position.y};
+	paddle.haut_gauche = (Vector2) {paddle.position.x+paddle.size.x,paddle.position.y};
+	paddle.bas_droite  = (Vector2) {paddle.position.x,paddle.position.y-paddle.size.y};
+	paddle.bas_gauche  = (Vector2) {paddle.position.x+paddle.size.x,paddle.position.y-paddle.size.y};
+	paddle.hit         = FALSE;
 
 	ball.center.x = 0;
 	ball.center.y = 0;
@@ -76,6 +86,10 @@ int main (int argc, char** argv) {
 			tmp.size.y = TAB_HEIGHT;
 			tmp.position.x = x * (tmp.size.x * WIDTH / WIDTH);
 			tmp.position.y = y * (tmp.size.y * HEIGHT / HEIGHT);
+			tmp.haut_droite = (Vector2) {tmp.position.x,tmp.position.y};
+			tmp.haut_gauche = (Vector2) {tmp.position.x+tmp.size.x,tmp.position.y};
+			tmp.bas_droite  = (Vector2) {tmp.position.x,tmp.position.y-tmp.size.y};
+			tmp.bas_gauche  = (Vector2) {tmp.position.x+tmp.size.x,tmp.position.y-tmp.size.y};
 			tmp.color = SKYBLUE;
 			tmp.hit = FALSE;
 			tabBrick[x][y] = tmp;
@@ -85,11 +99,16 @@ int main (int argc, char** argv) {
 	InitWindow(800, 800, "Casse-briques");
 	SetTargetFPS(60);
 
+	left = NBR_BRIK_H * NBR_BRIK_W;
+	failled = 0;
 	while (!WindowShouldClose()) {
 
 		BeginDrawing();
 		ClearBackground(BLACK);
 
+		if (IsKeyDown(KEY_ESCAPE)) {
+			start = FALSE;
+		}
 
 		if (IsKeyDown(KEY_SPACE)){
 			start = TRUE;
@@ -101,6 +120,11 @@ int main (int argc, char** argv) {
 
 		if (IsKeyDown(KEY_P) && paddle.position.x < WIDTH - paddle.size.x){
 			paddle.position.x += 5.0f;
+		}
+
+
+		if (left == 0){
+			start = FALSE;
 		}
 
 		if (start == FALSE) {
@@ -143,6 +167,7 @@ int main (int argc, char** argv) {
 			// echec: perte de la balle
 			if (ball.center.y > HEIGHT) {
 				start = FALSE;
+				failled++;
 			}
 
 
@@ -150,7 +175,6 @@ int main (int argc, char** argv) {
 		    for (int x=0; x<NBR_BRIK_W+1; x++){
 		    	for (int y=0; y<NBR_BRIK_H+1; y++) {
 					b = tabBrick[x][y];
-					DrawText(TextFormat("Ball x: %3.0f y: %3.0f",ball.center.x,ball.center.y), WIDTH/2, HEIGHT/2, 12, WHITE);
 
 					// frapper par en-dessous.
 					if (   b.hit == FALSE
@@ -159,6 +183,7 @@ int main (int argc, char** argv) {
 						&& ball.center.y + ball.radius <= b.position.y + b.size.y) {
 						tabBrick[x][y].hit   = TRUE;
 						ball.dir.y = 1;
+						left--;
 					}
 
 					// frapper par en-dessus.
@@ -169,6 +194,7 @@ int main (int argc, char** argv) {
                     ) {
                     	tabBrick[x][y].hit = TRUE;
                         ball.dir.y = -1;
+                        left--;
                     }
 
 					// frapper par la gauche.
@@ -178,6 +204,7 @@ int main (int argc, char** argv) {
 						 && ball.center.y + ball.radius <= b.position.y + b.position.y) {
                     	tabBrick[x][y].hit = TRUE;
                     	ball.dir.x = 1;
+                    	left--;
                     }*/
 
 					// frapper par la droite.
@@ -188,12 +215,15 @@ int main (int argc, char** argv) {
                     ) {
                        tabBrick[x][y].hit   = TRUE;
                        ball.dir.x = -1;
+                       left--;
                     }*/
 
 					affTabBrik(tabBrick);
 				    affSepBrik();
+				    DrawText(TextFormat("%02i",left), WIDTH/2, HEIGHT/2, 12, WHITE);
 		    	}
 		    }
+
 
 
 			ball.center.x = ball.center.x + VITESSE * ball.dir.x;
@@ -214,7 +244,6 @@ int main (int argc, char** argv) {
 	CloseWindow();
 	return 0;
 }
-
 
 /**
  *
