@@ -17,7 +17,7 @@
 #define NBR_BRIK_H   10
 #define TAB_WIDTH   100
 #define TAB_HEIGHT   20
-#define VITESSE     2.0
+#define VITESSE     4.0
 
 typedef enum BOOL {TRUE = 0, FALSE = 1} BOOL;
 
@@ -46,6 +46,7 @@ typedef struct BALL {
 typedef struct Item Paddle;
 typedef struct Item Brik;
 
+isLeft(Brik tab[][NBR_BRIK_H]);
 void affSepBrik ();
 void affTabBrik(Brik tab[][NBR_BRIK_H]);
 
@@ -122,10 +123,7 @@ int main (int argc, char** argv) {
 			paddle.position.x += 5.0f;
 		}
 
-
-		if (left == 0){
-			start = FALSE;
-		}
+		if (left == 0) start = FALSE;
 
 		if (start == FALSE) {
 			affTabBrik(tabBrick);
@@ -170,7 +168,6 @@ int main (int argc, char** argv) {
 				failled++;
 			}
 
-
 			Brik b;
 		    for (int x=0; x<NBR_BRIK_W+1; x++){
 		    	for (int y=0; y<NBR_BRIK_H+1; y++) {
@@ -183,7 +180,6 @@ int main (int argc, char** argv) {
 						&& ball.center.y + ball.radius <= b.position.y + b.size.y) {
 						tabBrick[x][y].hit   = TRUE;
 						ball.dir.y = 1;
-						left--;
 					}
 
 					// frapper par en-dessus.
@@ -194,30 +190,30 @@ int main (int argc, char** argv) {
                     ) {
                     	tabBrick[x][y].hit = TRUE;
                         ball.dir.y = -1;
-                        left--;
                     }
 
 					// frapper par la gauche.
-                    /*if (  b.hit == FALSE
-                    	 && ball.center.x + ball.radius <= b.position.x + b.position.x
-						 && ball.center.y + ball.radius >= b.position.y
-						 && ball.center.y + ball.radius <= b.position.y + b.position.y) {
+                    if (  b.hit == FALSE
+                    		&& ball.center.x + ball.radius <= b.haut_gauche.x
+                    		&& ball.center.y + ball.radius <= b.haut_gauche.y
+                    	    && ball.center.y + ball.radius >= b.bas_gauche.y
+                    	    && ball.center.x + ball.radius >= b.bas_gauche.x) {
                     	tabBrick[x][y].hit = TRUE;
                     	ball.dir.x = 1;
-                    	left--;
-                    }*/
+                    }
 
 					// frapper par la droite.
-                    /*if (  b.hit == FALSE
-                       && ball.center.x + ball.radius >= b.position.x
-					   && ball.center.y + ball.radius >= b.position.y
-					   && ball.center.y + ball.radius <= b.position.y + b.position.y
+                    if (  b.hit == FALSE
+                       && ball.center.x + ball.radius <= b.haut_droite.x
+					   && ball.center.y + ball.radius <= b.haut_droite.y
+					   && ball.center.y + ball.radius >= b.bas_droite.y
+					   && ball.center.x + ball.radius >= b.bas_droite.x
                     ) {
                        tabBrick[x][y].hit   = TRUE;
                        ball.dir.x = -1;
-                       left--;
-                    }*/
+                    }
 
+                    left = isLeft(tabBrick);
 					affTabBrik(tabBrick);
 				    affSepBrik();
 				    DrawText(TextFormat("%02i",left), WIDTH/2, HEIGHT/2, 12, WHITE);
@@ -244,6 +240,48 @@ int main (int argc, char** argv) {
 	CloseWindow();
 	return 0;
 }
+
+/**
+ *
+ */
+int isLeft(Brik tab[][NBR_BRIK_H]) {
+	int res = NBR_BRIK_H * NBR_BRIK_W;
+	Brik b;
+	for (int x = 0; x<NBR_BRIK_W; x++) {
+		for (int y = 0; y < NBR_BRIK_H; y++) {
+			b = tab[x][y];
+			if (b.hit == TRUE) {
+				res--;
+			}
+		}
+	}
+
+	return res;
+}
+
+/**
+ *
+ */
+/*Brik* init() {
+
+	Brik tap[NBR_BRIK_W][NBR_BRIK_H];
+	Brik tmp;
+	for (int x=0; x<NBR_BRIK_W; x++) {
+		for (int y=0; y<NBR_BRIK_W; y++) {
+			tmp.size.x = TAB_WIDTH;
+			tmp.size.y = TAB_HEIGHT;
+			tmp.position.x = x * (tmp.size.x * WIDTH / WIDTH);
+			tmp.position.y = y * (tmp.size.y * HEIGHT / HEIGHT);
+			tmp.haut_droite = (Vector2) {tmp.position.x,tmp.position.y};
+			tmp.haut_gauche = (Vector2) {tmp.position.x+tmp.size.x,tmp.position.y};
+			tmp.bas_droite  = (Vector2) {tmp.position.x,tmp.position.y-tmp.size.y};
+			tmp.bas_gauche  = (Vector2) {tmp.position.x+tmp.size.x,tmp.position.y-tmp.size.y};
+			tmp.color = SKYBLUE;
+			tmp.hit = FALSE;
+			tab = &tmp;
+		}
+	}
+}*/
 
 /**
  *
