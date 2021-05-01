@@ -6,6 +6,8 @@
  */
 
 #include "game.h";
+#include <raylib.h>
+#include <stdio.h>
 
 /**
  *
@@ -41,7 +43,6 @@ void affTabBrik(Brik tab[][NBR_BRIK_H]) {
  */
 Brik* init(Brik * tab) {
 
-	// Brik t[NBR_BRIK_W][NBR_BRIK_H];
 	Brik tmp;
 	Brik * ligne;
 
