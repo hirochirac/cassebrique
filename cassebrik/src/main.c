@@ -46,7 +46,8 @@ typedef struct BALL {
 typedef struct Item Paddle;
 typedef struct Item Brik;
 
-isLeft(Brik tab[][NBR_BRIK_H]);
+Brik* init(Brik * tab);
+int isLeft(Brik tab[][NBR_BRIK_H]);
 void affSepBrik ();
 void affTabBrik(Brik tab[][NBR_BRIK_H]);
 
@@ -262,12 +263,18 @@ int isLeft(Brik tab[][NBR_BRIK_H]) {
 /**
  *
  */
-/*Brik* init() {
+Brik* init(Brik * tab) {
 
-	Brik tap[NBR_BRIK_W][NBR_BRIK_H];
 	Brik tmp;
+	Brik * ligne;
+
+	if (sizeof(tab) > 0)
+		free(tab);
+
+	tab = (Brik *) malloc(sizeof(Brik) * NBR_BRIK_W - 1);
 	for (int x=0; x<NBR_BRIK_W; x++) {
-		for (int y=0; y<NBR_BRIK_W; y++) {
+		ligne = (Brik *) malloc(sizeof(Brik) * NBR_BRIK_H-1);
+		for (int y=0; y<NBR_BRIK_H; y++) {
 			tmp.size.x = TAB_WIDTH;
 			tmp.size.y = TAB_HEIGHT;
 			tmp.position.x = x * (tmp.size.x * WIDTH / WIDTH);
@@ -278,10 +285,11 @@ int isLeft(Brik tab[][NBR_BRIK_H]) {
 			tmp.bas_gauche  = (Vector2) {tmp.position.x+tmp.size.x,tmp.position.y-tmp.size.y};
 			tmp.color = SKYBLUE;
 			tmp.hit = FALSE;
-			tab = &tmp;
+			*(ligne+y) = tmp;
 		}
+		*(tab+x) = ligne;
 	}
-}*/
+}
 
 /**
  *
