@@ -14,10 +14,11 @@
 #define WIDTH       800
 #define HEIGHT      800
 #define NBR_BRIK_W    8
-#define NBR_BRIK_H   10
+#define NBR_BRIK_H   18
 #define TAB_WIDTH   100
 #define TAB_HEIGHT   20
 #define VITESSE     4.0
+#define MAX_LIFE    3;
 
 typedef enum BOOL {TRUE = 0, FALSE = 1} BOOL;
 
@@ -46,7 +47,8 @@ typedef struct BALL {
 typedef struct Item Paddle;
 typedef struct Item Brik;
 
-Brik* init(Brik * tab);
+
+// void init(Brik tab[][NBR_BRIK_H]);
 int isLeft(Brik tab[][NBR_BRIK_H]);
 void affSepBrik ();
 void affTabBrik(Brik tab[][NBR_BRIK_H]);
@@ -59,7 +61,7 @@ int main (int argc, char** argv) {
 	Ball ball;
 	BOOL start = FALSE;
 	int left;
-	int failled;
+	int life = MAX_LIFE;
 
 	paddle.size        = (Vector2) {200,5};
 	paddle.color       = (Color)   {0,0,1};
@@ -102,7 +104,6 @@ int main (int argc, char** argv) {
 	SetTargetFPS(60);
 
 	left = NBR_BRIK_H * NBR_BRIK_W;
-	failled = 0;
 	while (!WindowShouldClose()) {
 
 		BeginDrawing();
@@ -124,11 +125,56 @@ int main (int argc, char** argv) {
 			paddle.position.x += 5.0f;
 		}
 
-		if (left == 0) start = FALSE;
+		if (life == 0) {
+			DrawText(TextFormat("Perdu"), WIDTH/2, (HEIGHT/2)+10, 12, WHITE);
+			start = FALSE;
+			life = MAX_LIFE;
+			for (int x=0; x<NBR_BRIK_W; x++) {
+				for (int y=0; y<NBR_BRIK_H; y++) {
+					tmp.size.x = TAB_WIDTH;
+					tmp.size.y = TAB_HEIGHT;
+					tmp.position.x = x * (tmp.size.x * WIDTH / WIDTH);
+					tmp.position.y = y * (tmp.size.y * HEIGHT / HEIGHT);
+					tmp.haut_droite = (Vector2) {tmp.position.x,tmp.position.y};
+					tmp.haut_gauche = (Vector2) {tmp.position.x+tmp.size.x,tmp.position.y};
+					tmp.bas_droite  = (Vector2) {tmp.position.x,tmp.position.y-tmp.size.y};
+					tmp.bas_gauche  = (Vector2) {tmp.position.x+tmp.size.x,tmp.position.y-tmp.size.y};
+				    tmp.color = SKYBLUE;
+				    tmp.hit = FALSE;
+					tabBrick[x][y] = tmp;
+				}
+			}
+		}
+
+		if (left == 0 && life > 0) {
+			DrawText(TextFormat("Gagné"), WIDTH/2, (HEIGHT/2)+10, 12, WHITE);
+			start = FALSE;
+			life = MAX_LIFE;
+			for (int x=0; x<NBR_BRIK_W; x++) {
+				for (int y=0; y<NBR_BRIK_H; y++) {
+					tmp.size.x = TAB_WIDTH;
+					tmp.size.y = TAB_HEIGHT;
+					tmp.position.x = x * (tmp.size.x * WIDTH / WIDTH);
+					tmp.position.y = y * (tmp.size.y * HEIGHT / HEIGHT);
+					tmp.haut_droite = (Vector2) {tmp.position.x,tmp.position.y};
+				    tmp.haut_gauche = (Vector2) {tmp.position.x+tmp.size.x,tmp.position.y};
+					tmp.bas_droite  = (Vector2) {tmp.position.x,tmp.position.y-tmp.size.y};
+					tmp.bas_gauche  = (Vector2) {tmp.position.x+tmp.size.x,tmp.position.y-tmp.size.y};
+					tmp.color = SKYBLUE;
+				    tmp.hit = FALSE;
+					tabBrick[x][y] = tmp;
+				 }
+			}
+		}
 
 		if (start == FALSE) {
+			if (life == 3) {
+				left = NBR_BRIK_H * NBR_BRIK_W;
+			}
 			affTabBrik(tabBrick);
 			affSepBrik();
+			printf("life perte partie: %d\n",life);
+			DrawText(TextFormat("%01i",life), WIDTH/2, (HEIGHT/2)+10, 12, WHITE);
 			ball.center.x = paddle.position.x + paddle.size.x / 2;
 			ball.center.y = paddle.position.y - ball.radius;
 			ball.north = (Vector2){ball.center.x+ball.radius,ball.center.y+ball.radius};
@@ -166,7 +212,8 @@ int main (int argc, char** argv) {
 			// echec: perte de la balle
 			if (ball.center.y > HEIGHT) {
 				start = FALSE;
-				failled++;
+				life = life - 1;
+				DrawText(TextFormat("%01i",life), WIDTH/2, (HEIGHT/2)+10, 12, WHITE);
 			}
 
 			Brik b;
@@ -218,10 +265,9 @@ int main (int argc, char** argv) {
 					affTabBrik(tabBrick);
 				    affSepBrik();
 				    DrawText(TextFormat("%02i",left), WIDTH/2, HEIGHT/2, 12, WHITE);
+				    DrawText(TextFormat("%01i",life), WIDTH/2, (HEIGHT/2)+10, 12, WHITE);
 		    	}
 		    }
-
-
 
 			ball.center.x = ball.center.x + VITESSE * ball.dir.x;
 			ball.center.y = ball.center.y + VITESSE * ball.dir.y;
@@ -234,6 +280,8 @@ int main (int argc, char** argv) {
 		DrawCircleV(ball.center,ball.radius,ball.color);
 		DrawRectangleV(paddle.position,paddle.size,WHITE);
 
+
+
 		EndDrawing();
 	}
 
@@ -241,6 +289,33 @@ int main (int argc, char** argv) {
 	CloseWindow();
 	return 0;
 }
+
+
+/**
+ *
+ */
+/*void init(tab[][NBR_BRIK_H]) {
+
+	Brik tmp;
+	for (int x=0; x<NBR_BRIK_W; x++) {
+		for (int y=0; y<NBR_BRIK_H; y++) {
+			tmp.size.x = TAB_WIDTH;
+			tmp.size.y = TAB_HEIGHT;
+			tmp.position.x = x * (tmp.size.x * WIDTH / WIDTH);
+			tmp.position.y = y * (tmp.size.y * HEIGHT / HEIGHT);
+			tmp.haut_droite = (Vector2) {tmp.position.x,tmp.position.y};
+			tmp.haut_gauche = (Vector2) {tmp.position.x+tmp.size.x,tmp.position.y};
+			tmp.bas_droite  = (Vector2) {tmp.position.x,tmp.position.y-tmp.size.y};
+			tmp.bas_gauche  = (Vector2) {tmp.position.x+tmp.size.x,tmp.position.y-tmp.size.y};
+			tmp.color = SKYBLUE;
+			tmp.hit = FALSE;
+			tab[x][y] = tmp;
+		}
+	}
+}*/
+
+
+
 
 /**
  *
@@ -258,37 +333,6 @@ int isLeft(Brik tab[][NBR_BRIK_H]) {
 	}
 
 	return res;
-}
-
-/**
- *
- */
-Brik* init(Brik * tab) {
-
-	Brik tmp;
-	Brik * ligne;
-
-	if (sizeof(tab) > 0)
-		free(tab);
-
-	tab = (Brik *) malloc(sizeof(Brik) * NBR_BRIK_W - 1);
-	for (int x=0; x<NBR_BRIK_W; x++) {
-		ligne = (Brik *) malloc(sizeof(Brik) * NBR_BRIK_H-1);
-		for (int y=0; y<NBR_BRIK_H; y++) {
-			tmp.size.x = TAB_WIDTH;
-			tmp.size.y = TAB_HEIGHT;
-			tmp.position.x = x * (tmp.size.x * WIDTH / WIDTH);
-			tmp.position.y = y * (tmp.size.y * HEIGHT / HEIGHT);
-			tmp.haut_droite = (Vector2) {tmp.position.x,tmp.position.y};
-			tmp.haut_gauche = (Vector2) {tmp.position.x+tmp.size.x,tmp.position.y};
-			tmp.bas_droite  = (Vector2) {tmp.position.x,tmp.position.y-tmp.size.y};
-			tmp.bas_gauche  = (Vector2) {tmp.position.x+tmp.size.x,tmp.position.y-tmp.size.y};
-			tmp.color = SKYBLUE;
-			tmp.hit = FALSE;
-			*(ligne+y) = tmp;
-		}
-		*(tab+x) = ligne;
-	}
 }
 
 /**
