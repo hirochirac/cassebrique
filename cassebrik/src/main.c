@@ -48,7 +48,7 @@ typedef struct Item Paddle;
 typedef struct Item Brik;
 
 
-// void init(Brik tab[][NBR_BRIK_H]);
+void init(Brik * tab);
 int isLeft(Brik tab[][NBR_BRIK_H]);
 void affSepBrik ();
 void affTabBrik(Brik tab[][NBR_BRIK_H]);
@@ -82,23 +82,7 @@ int main (int argc, char** argv) {
 	ball.dir      = (Vector2){1,-1};
 	ball.color    = RED;
 
-
-	Brik tmp;
-	for (int x=0; x<NBR_BRIK_W; x++) {
-		for (int y=0; y<NBR_BRIK_H; y++) {
-			tmp.size.x = TAB_WIDTH;
-			tmp.size.y = TAB_HEIGHT;
-			tmp.position.x = x * (tmp.size.x * WIDTH / WIDTH);
-			tmp.position.y = y * (tmp.size.y * HEIGHT / HEIGHT);
-			tmp.haut_droite = (Vector2) {tmp.position.x,tmp.position.y};
-			tmp.haut_gauche = (Vector2) {tmp.position.x+tmp.size.x,tmp.position.y};
-			tmp.bas_droite  = (Vector2) {tmp.position.x,tmp.position.y-tmp.size.y};
-			tmp.bas_gauche  = (Vector2) {tmp.position.x+tmp.size.x,tmp.position.y-tmp.size.y};
-			tmp.color = SKYBLUE;
-			tmp.hit = FALSE;
-			tabBrick[x][y] = tmp;
-		}
-	}
+	init((Brik * )tabBrick);
 
 	InitWindow(800, 800, "Casse-briques");
 	SetTargetFPS(60);
@@ -129,42 +113,14 @@ int main (int argc, char** argv) {
 			DrawText(TextFormat("Perdu"), WIDTH/2, (HEIGHT/2)+10, 12, WHITE);
 			start = FALSE;
 			life = MAX_LIFE;
-			for (int x=0; x<NBR_BRIK_W; x++) {
-				for (int y=0; y<NBR_BRIK_H; y++) {
-					tmp.size.x = TAB_WIDTH;
-					tmp.size.y = TAB_HEIGHT;
-					tmp.position.x = x * (tmp.size.x * WIDTH / WIDTH);
-					tmp.position.y = y * (tmp.size.y * HEIGHT / HEIGHT);
-					tmp.haut_droite = (Vector2) {tmp.position.x,tmp.position.y};
-					tmp.haut_gauche = (Vector2) {tmp.position.x+tmp.size.x,tmp.position.y};
-					tmp.bas_droite  = (Vector2) {tmp.position.x,tmp.position.y-tmp.size.y};
-					tmp.bas_gauche  = (Vector2) {tmp.position.x+tmp.size.x,tmp.position.y-tmp.size.y};
-				    tmp.color = SKYBLUE;
-				    tmp.hit = FALSE;
-					tabBrick[x][y] = tmp;
-				}
-			}
+			init((Brik * )tabBrick);
 		}
 
 		if (left == 0 && life > 0) {
 			DrawText(TextFormat("Gagné"), WIDTH/2, (HEIGHT/2)+10, 12, WHITE);
 			start = FALSE;
 			life = MAX_LIFE;
-			for (int x=0; x<NBR_BRIK_W; x++) {
-				for (int y=0; y<NBR_BRIK_H; y++) {
-					tmp.size.x = TAB_WIDTH;
-					tmp.size.y = TAB_HEIGHT;
-					tmp.position.x = x * (tmp.size.x * WIDTH / WIDTH);
-					tmp.position.y = y * (tmp.size.y * HEIGHT / HEIGHT);
-					tmp.haut_droite = (Vector2) {tmp.position.x,tmp.position.y};
-				    tmp.haut_gauche = (Vector2) {tmp.position.x+tmp.size.x,tmp.position.y};
-					tmp.bas_droite  = (Vector2) {tmp.position.x,tmp.position.y-tmp.size.y};
-					tmp.bas_gauche  = (Vector2) {tmp.position.x+tmp.size.x,tmp.position.y-tmp.size.y};
-					tmp.color = SKYBLUE;
-				    tmp.hit = FALSE;
-					tabBrick[x][y] = tmp;
-				 }
-			}
+			init((Brik * )tabBrick);
 		}
 
 		if (start == FALSE) {
@@ -189,13 +145,13 @@ int main (int argc, char** argv) {
 				ball.dir.x = -ball.dir.x;
 			}
 
-			// rebond sur le bord gauche de l'écran.
+			// rebond sur le bord gauche de l'ï¿½cran.
 			if (ball.center.x + ball.radius >= WIDTH) {
 				ball.center.x = WIDTH - ball.radius;
 				ball.dir.x = -ball.dir.x;
 			}
 
-			// rebond sur le bord droit de l'écran.
+			// rebond sur le bord droit de l'ï¿½cran.
 			if (ball.center.y + ball.radius <= 0 ) {
 				ball.center.y = ball.radius;
 				ball.dir.y = -ball.dir.y;
@@ -214,6 +170,7 @@ int main (int argc, char** argv) {
 				start = FALSE;
 				life = life - 1;
 				DrawText(TextFormat("%01i",life), WIDTH/2, (HEIGHT/2)+10, 12, WHITE);
+				affTabBrik(tabBrick);
 			}
 
 			Brik b;
@@ -279,9 +236,6 @@ int main (int argc, char** argv) {
 
 		DrawCircleV(ball.center,ball.radius,ball.color);
 		DrawRectangleV(paddle.position,paddle.size,WHITE);
-
-
-
 		EndDrawing();
 	}
 
@@ -294,9 +248,10 @@ int main (int argc, char** argv) {
 /**
  *
  */
-/*void init(tab[][NBR_BRIK_H]) {
+void init ( Brik * tab ) {
 
 	Brik tmp;
+	int cur = 0;
 	for (int x=0; x<NBR_BRIK_W; x++) {
 		for (int y=0; y<NBR_BRIK_H; y++) {
 			tmp.size.x = TAB_WIDTH;
@@ -307,12 +262,13 @@ int main (int argc, char** argv) {
 			tmp.haut_gauche = (Vector2) {tmp.position.x+tmp.size.x,tmp.position.y};
 			tmp.bas_droite  = (Vector2) {tmp.position.x,tmp.position.y-tmp.size.y};
 			tmp.bas_gauche  = (Vector2) {tmp.position.x+tmp.size.x,tmp.position.y-tmp.size.y};
-			tmp.color = SKYBLUE;
+			tmp.color = (Color){GetRandomValue(2,255)+1,255,10,1};
 			tmp.hit = FALSE;
-			tab[x][y] = tmp;
+			*(tab+cur) = tmp;
+			cur++;
 		}
 	}
-}*/
+}
 
 
 
@@ -356,7 +312,7 @@ void affTabBrik(Brik tab[][NBR_BRIK_H]) {
 		for (int y=0; y<NBR_BRIK_H; y++){
 			bb = (Brik)tab[x][y];
 			if (bb.hit == FALSE) {
-				DrawRectangleV((Vector2){bb.position.x,bb.position.y},(Vector2){bb.size.x,bb.size.y},SKYBLUE);
+				DrawRectangleV((Vector2){bb.position.x,bb.position.y},(Vector2){bb.size.x,bb.size.y},bb.color);
 			} else {
 				DrawRectangleV((Vector2){bb.position.x,bb.position.y},(Vector2){bb.size.x,bb.size.y},BLACK);
 			}
