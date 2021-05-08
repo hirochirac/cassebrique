@@ -52,6 +52,7 @@ void init(Brik * tab);
 int isLeft(Brik tab[][NBR_BRIK_H]);
 void affSepBrik ();
 void affTabBrik(Brik tab[][NBR_BRIK_H]);
+void affScore ();
 
 int main (int argc, char** argv) {
 
@@ -130,7 +131,7 @@ int main (int argc, char** argv) {
 			affTabBrik(tabBrick);
 			affSepBrik();
 			printf("life perte partie: %d\n",life);
-			DrawText(TextFormat("%01i",life), WIDTH/2, (HEIGHT/2)+10, 12, WHITE);
+			affScore(left,life);
 			ball.center.x = paddle.position.x + paddle.size.x / 2;
 			ball.center.y = paddle.position.y - ball.radius;
 			ball.north = (Vector2){ball.center.x+ball.radius,ball.center.y+ball.radius};
@@ -169,7 +170,7 @@ int main (int argc, char** argv) {
 			if (ball.center.y > HEIGHT) {
 				start = FALSE;
 				life = life - 1;
-				DrawText(TextFormat("%01i",life), WIDTH/2, (HEIGHT/2)+10, 12, WHITE);
+				affScore(left,life);
 				affTabBrik(tabBrick);
 			}
 
@@ -221,8 +222,7 @@ int main (int argc, char** argv) {
                     left = isLeft(tabBrick);
 					affTabBrik(tabBrick);
 				    affSepBrik();
-				    DrawText(TextFormat("%02i",left), WIDTH/2, HEIGHT/2, 12, WHITE);
-				    DrawText(TextFormat("%01i",life), WIDTH/2, (HEIGHT/2)+10, 12, WHITE);
+				    affScore(left,life);
 		    	}
 		    }
 
@@ -239,9 +239,14 @@ int main (int argc, char** argv) {
 		EndDrawing();
 	}
 
-
 	CloseWindow();
 	return 0;
+}
+
+
+void affScore (int left, int life) {
+	DrawText(TextFormat("%02i BRIQUE(S) RESTANTE(S)",left), WIDTH/2-250, HEIGHT-10, 12, WHITE);
+	DrawText(TextFormat("%01i VIE(S)",life), WIDTH/2, HEIGHT-10, 12, WHITE);
 }
 
 
@@ -262,15 +267,14 @@ void init ( Brik * tab ) {
 			tmp.haut_gauche = (Vector2) {tmp.position.x+tmp.size.x,tmp.position.y};
 			tmp.bas_droite  = (Vector2) {tmp.position.x,tmp.position.y-tmp.size.y};
 			tmp.bas_gauche  = (Vector2) {tmp.position.x+tmp.size.x,tmp.position.y-tmp.size.y};
-			tmp.color = (Color){GetRandomValue(2,255)+1,255,10,1};
+			tmp.color = WHITE;
 			tmp.hit = FALSE;
 			*(tab+cur) = tmp;
 			cur++;
 		}
 	}
+	tab = NULL;
 }
-
-
 
 
 /**
